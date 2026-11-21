@@ -1,0 +1,39 @@
+services:
+  qaryati-db:
+    image: mysql:8.0
+    container_name: qaryati_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: qaryati_db
+      MYSQL_USER: qaryati_user
+      MYSQL_PASSWORD: qaryati_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - qaryati_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  qaryati-app:
+    build: .
+    container_name: qaryati_backend
+    depends_on:
+      qaryati-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://qaryati-db:3306/qaryati_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: qaryati_user
+      DB_PASSWORD: qaryati_password
+      QARYATI_CLI_ENABLED: "false"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  qaryati_mysql_data:
+

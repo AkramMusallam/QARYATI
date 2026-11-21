@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: qaryati-platform
+
+  profiles:
+    default: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3307/qaryati_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:qaryati_user}
+    password: ${DB_PASSWORD:qaryati_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  cache:
+    cache-names: geolocations,villages
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=24h
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{correlationId:-SYSTEM}] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.qaryati: INFO
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+qaryati:
+  jwt:
+    secret: ${JWT_SECRET:qaryatiSecretKeyForJwtAuthenticationMustBeAtLeast256Bits}
+    expiration: ${JWT_EXPIRATION:24h}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_RPM:300}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+  cli:
+    enabled: ${QARYATI_CLI_ENABLED:true}
+
+resilience4j.retry:
+  instances:
+    nominatimApi:
+      maxAttempts: 3
+      waitDuration: 2s
+      retryExceptions:
+        - org.springframework.web.client.RestClientException
+        - java.net.SocketTimeoutException

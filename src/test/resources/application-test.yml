@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:qaryati_test_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+qaryati:
+  cli:
+    enabled: false
+  rate-limit:
+    enabled: true
+    requests-per-minute: 500
